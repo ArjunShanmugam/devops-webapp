@@ -20,3 +20,17 @@ jobs:
         run: |
           test -f index.html
           echo "Web application build successful"
+
+      - name: Send Slack notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" = "success" ]; then
+            STATUS="SUCCESS"
+          else
+            STATUS="FAILED"
+          fi
+
+          curl -X POST \
+            -H 'Content-type: application/json' \
+            --data "{\"text\":\"CI Pipeline: $STATUS | Repository: ${{ github.repository }} | Commit: ${{ github.sha }}\"}" \
+            "${{ secrets.SLACK_WEBHOOK_URL }}"
